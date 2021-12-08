@@ -8,3 +8,10 @@ func readFile(_ name: String) -> String {
     let data = try! Data(contentsOf: fileURL)
     return String(data: data, encoding: .utf8)!
 }
+
+extension String {
+    var lines: [String] {
+        split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
+    }
+}
+
