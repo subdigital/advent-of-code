@@ -4,18 +4,24 @@ enum Day3 {
         let readings = lines.map(Reading.init)
         print("Have \(readings.count) readings")
         let diagnostics = Diagnostics(readings: readings)
+
         print("Gamma rate: \(diagnostics.gammaRate)")
         print("Epsilon rate: \(diagnostics.epsilonRate)")
         print("power consumption: \(diagnostics.powerConsumption)")
+        print("O2 Generator Rating: \(diagnostics.o2GeneratorRating)")
+        print("CO2 Scrubber Rating: \(diagnostics.co2ScrubberRating)")
+        print("Life Support Rating: \(diagnostics.lifeSupportRating)")
     }
 }
 
 struct Reading {
-    private let value: UInt
+    let value: UInt
     let width: Int
+    let stringValue: String
 
     init(stringValue: String) {
         print("Reading: \(stringValue) ==> ", terminator: "")
+        self.stringValue = stringValue
         value = UInt(stringValue, radix: 2)!
         print(value)
         width = stringValue.count
@@ -43,16 +49,53 @@ class Diagnostics {
 
     var gammaRate: UInt {
         let bits = (0..<readingWidth).map { i in
-            commonBit(at: i)
+            commonBit(at: i, in: readings)
         }
         return constructInt(bits: bits)
     }
 
     var epsilonRate: UInt {
         let bits = (0..<readingWidth).map { i in
-            leastCommonBit(at: i)
+            leastCommonBit(at: i, in: readings)
         }
         return constructInt(bits: bits)
+    }
+
+    var o2GeneratorRating: UInt {
+        filterReadings { i, readings in 
+            let common = commonBit(at: i, in: readings)
+            return readings.filter { r in
+                r.bit(at: i) == common
+            }
+        }?.value ?? 0
+    }
+
+    var co2ScrubberRating: UInt {
+        filterReadings { i, readings in 
+            let leastCommon = leastCommonBit(at: i, in: readings)
+            return readings.filter { r in
+                r.bit(at: i) == leastCommon
+            }
+        }?.value ?? 0
+    }
+
+    var lifeSupportRating: UInt {
+        o2GeneratorRating * co2ScrubberRating
+    }
+
+    private func filterReadings(using filterBlock: (Int, [Reading]) -> [Reading]) -> Reading? {
+        var filteredReadings = self.readings
+
+        for i in 0..<readingWidth {
+            // print("bit position: \(i)")
+            filteredReadings = filterBlock(i, filteredReadings)
+            // print("filteredReadings: \n\t" + filteredReadings.map(\.stringValue).joined(separator: "\n\t") + "\n")
+            if filteredReadings.count == 1 {
+                return filteredReadings[0]
+            }
+        }
+
+        return nil
     }
 
     private func constructInt(bits: [UInt]) -> UInt {
@@ -67,16 +110,17 @@ class Diagnostics {
     }()
 
     // position is 0 indexed from the left
-    private func commonBit(at position: Int) -> UInt {
+    private func commonBit(at position: Int, in readings: [Reading]) -> UInt {
         assert(!readings.isEmpty)
         assert(position >= 0 || position < readingWidth)
 
         let bits = readings.map { $0.bit(at: position) }
         let sum = bits.reduce(0, +)
-        return UInt((Float(sum) / Float(readings.count)).rounded())
+        let f = (Float(sum) / Float(readings.count)).rounded()
+        return UInt(f)
     }
 
-    private func leastCommonBit(at position: Int) -> UInt {
-        1 - commonBit(at: position)
+    private func leastCommonBit(at position: Int, in readings: [Reading]) -> UInt {
+        1 - commonBit(at: position, in: readings)
     }
 }
