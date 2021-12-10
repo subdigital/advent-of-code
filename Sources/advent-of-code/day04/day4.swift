@@ -35,6 +35,8 @@ struct BingoBoard {
     let cells: [BingoCell]
     let size: Int
 
+    var isFinished: Bool = false
+
     init(numbers: [Int], boardSize: Int) {
         cells = numbers.map { BingoCell($0) }
         assert(cells.count == boardSize * boardSize)
@@ -95,26 +97,40 @@ struct BingoGame {
     let numbers: [Int]
     var boards: [BingoBoard]
 
+    struct WinInfo {
+        let board: BingoBoard
+        let winningNumber: Int
+    }
+
     mutating func run() {
+        var wins: [WinInfo] = []
+
         for number in numbers {
             print("We drew the number: \(number)")
 
             for (index, board) in boards.enumerated() {
-                let newBoard = board.evaluating(number) 
-                boards[index] = newBoard
-
-                print(newBoard.debugDescription)
+                if board.isFinished {
+                    continue
+                }
+                var newBoard = board.evaluating(number) 
                 if newBoard.isWinner {
                     print("🎉 we have a winner!")
-                    let sum = newBoard.cells
-                        .filter { !$0.isMarked }
-                        .map(\.value)
-                        .reduce(0, +)
-                    print("Unmarked sum: \(sum)")
-                    print("The answer is: \(number * sum)")
-                    return
+                    newBoard.isFinished = true
+                    wins.append(.init(board: newBoard, winningNumber: number))
                 }
+                boards[index] = newBoard
+                print(newBoard.debugDescription)
             }
+        }
+
+        if let lastWin = wins.last {
+            let sum = lastWin.board.cells
+                .filter { !$0.isMarked }
+                .map(\.value)
+                .reduce(0, +)
+            print("Unmarked sum: \(sum)")
+            print("Winning number: \(lastWin.winningNumber)")
+            print("The answer is: \(lastWin.winningNumber * sum)")
         }
     }
 }
