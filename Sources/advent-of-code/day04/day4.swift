@@ -57,14 +57,14 @@ struct BingoBoard {
     var isWinner: Bool {
         // rows
         for row in 0..<size {
-            if (0..<size).map { cells[index(row, $0)] }.allSatisfy(\.isMarked) {
+            if (0..<size).map({ cells[index(row, $0)] }).allSatisfy(\.isMarked) {
                 return true
             }
         }
 
         // cols
         for col in 0..<size {
-            if (0..<size).map { cells[index($0, col)] }.allSatisfy(\.isMarked) {
+            if (0..<size).map({ cells[index($0, col)] }).allSatisfy(\.isMarked) {
                 return true
             }
         }

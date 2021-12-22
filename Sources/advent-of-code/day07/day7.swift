@@ -37,10 +37,6 @@ struct HorizontalAligner {
             return cost
         }
 
-        for (p, cost) in zip(positions, costs) {
-            // print("[\(p)] -> \(target) costs \(cost)")
-        }
-
         return costs.reduce(0, +)
     }
 

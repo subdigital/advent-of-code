@@ -56,9 +56,6 @@ struct HeightMap {
         var knownBasinCoords: Set<Coordinate> = []
 
         for lowPoint in lowPoints() {
-            var currentBasinSize = 1
-            let lowPointHeight = height(at: lowPoint)
-
             let basinCoordinates = neighborsSlopingUpward(from: lowPoint) + [lowPoint]
             print("starting from low point: \(lowPoint)")
             print("Basin coordinates: \(basinCoordinates)")
@@ -147,7 +144,6 @@ struct HeightMap {
         return neighbors
     }
 }
-
 
 extension HeightMap.Coordinate {
     static func + (lhs: Self, rhs: Self) -> Self {
