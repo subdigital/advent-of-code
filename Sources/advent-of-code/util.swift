@@ -16,8 +16,9 @@ extension String {
 }
 
 extension Int {
-    init?(_ s: Substring) {
-        guard let int = Int(String(s)) else { return nil }
+    init?<S: CustomStringConvertible>(_ s: S) {
+        guard let int = Int(s.description) else { return nil }
         self = int
     }
 }
+

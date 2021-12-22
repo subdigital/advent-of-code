@@ -5,11 +5,11 @@ enum Day5 {
         let lineSegments = input.lines.compactMap(LineSegment.parse)
 
         let maxWidth = lineSegments.flatMap({ [$0.start, $0.end] })
-            .map(\.x)
+            .map(\.col)
             .max() ?? 1
 
         let maxHeight = lineSegments.flatMap({ [$0.start, $0.end] })
-            .map(\.y)
+            .map(\.row)
             .max() ?? 1
 
         var floor = OceanMap(width: maxWidth + 1, height: maxHeight + 1)
@@ -53,35 +53,13 @@ struct OceanMap {
         var output = ""
         for y in 0..<height {
             for x in 0..<width {
-                let coord = Coordinate(x: x, y: y)
+                let coord = Coordinate(row: y, col: x)
                 let mark = hydrothermalVentCoordinates[coord].flatMap(String.init) ?? "."
                 output += mark
             }
             output += "\n"
         }
         return output
-    }
-}
-
-struct Coordinate: Hashable, Equatable {
-    let x: Int
-    let y: Int
-
-    static func parse(_ string: String) -> Coordinate? {
-        let parts = string
-            .trimmingCharacters(in: .whitespaces)
-            .split(separator: ",")
-            .compactMap(Int.init)
-
-        guard parts.count == 2 else {
-            return nil
-        }
-
-        return Coordinate(x: parts[0], y: parts[1])
-    }
-
-    var debugDescription: String {
-        "\(x),\(y)" 
     }
 }
 
@@ -102,7 +80,7 @@ struct LineSegment {
     }
 
     var debugDescription: String {
-        "\(start.debugDescription) -> \(end.debugDescription)"
+        "\(start.description) -> \(end.description)"
     }
 
     var coordinates: [Coordinate] {
@@ -117,13 +95,13 @@ struct LineSegment {
             return 1
         }
 
-        let xInc = inc(start.x, end.x)
-        let yInc = inc(start.y, end.y)
+        let xInc = inc(start.col, end.col)
+        let yInc = inc(start.row, end.row)
         var p = start
         var coords: [Coordinate] = []
         while p != end {
             coords.append(p)
-            p = Coordinate(x: p.x + xInc, y: p.y + yInc)
+            p = Coordinate(row: p.row + yInc, col: p.col + xInc)
         }
         coords.append(p)
         return coords
