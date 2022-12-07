@@ -1,5 +1,5 @@
-extension String {
-    public func lines() -> [String.SubSequence] {
+extension StringProtocol {
+    public func lines() -> [Self.SubSequence] {
         split(separator: "\n")
     }
 }
