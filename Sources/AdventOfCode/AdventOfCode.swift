@@ -44,6 +44,8 @@ func challenge(for day: Int, input: String) -> Challenge? {
     case 4: return Day04(input: input)
     case 5: return Day05(input: input)
     case 6: return Day06(input: input)
+    case 7: return Day07(input: input)
+    case 8: return Day08(input: input)
     default:
         return nil
     }
