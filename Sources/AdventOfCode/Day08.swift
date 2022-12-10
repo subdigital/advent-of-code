@@ -42,46 +42,68 @@ struct Day08: Challenge {
             return transposed[c]
         }
 
+        func isEdge(_ x: Int, _ y: Int) -> Bool {
+            x == 0 || y == 0 || x == width - 1 || y == height - 1
+        }
+
         func isVisible(_ x: Int, _ y: Int) -> Bool {
             // edge nodes are visible
-            if x == 0 || y == 0 || x == width - 1 || y == height - 1 {
+            if isEdge(x, y) {
                 return true
             }
 
             let h = data[y][x]
             let column = column(x)
             let row = data[y]
-            print("\(y),\(x) (\(h)) ? ", terminator: " ")
 
             // look up
             if column[..<y].reversed().allSatisfy({ $0 < h }) {
-                print("visible by looking up")
                 return true
             }
 
             // look down
             if column[(y+1)...].allSatisfy({ $0 < h}) {
-                print("visible by looking down")
                 return true
             }
 
             // look left
             if row[..<x].reversed().allSatisfy({ $0 < h }) {
-                print("visible by looking left")
                 return true
             }
 
             // look right
-            let foo = row[(x+1)...]
-            print("  items to the right are \(foo)]", terminator: " ")
             if row[(x+1)...].allSatisfy({ $0 < h}) {
-                print("visible by looking right")
                 return true
             }
 
-            print("Not visible")
-
             return false
+        }
+
+        func scenicScore(_ x: Int, _ y: Int) -> Int {
+            if isEdge(x, y) {
+                return 0 // edge trees have a component of zero, so we can bail early
+            }
+
+            let h = data[y][x]
+            let column = column(x)
+            let row = data[y]
+
+            func visibleCount<S: Collection>(from height: Int, _ trees: S) -> Int
+            where S.Element == Int, S.Index == Int
+            {
+                trees.enumerated().first(where: { $0.element >= h })
+                  .flatMap { $0.offset + 1 }
+                  ?? trees.count
+            }
+
+            // look up
+            let upScore = visibleCount(from: h, column[..<y].reversed())
+            let downScore = visibleCount(from: h, column[(y+1)...])
+            let leftScore = visibleCount(from: h, row[..<x].reversed())
+            let rightScore = visibleCount(from: h, row[(x+1)...])
+            // print("U:\(upScore) * D:\(downScore) * L:\(leftScore) * R:\(rightScore)")
+
+            return upScore * downScore * leftScore * rightScore
         }
     }
 
@@ -90,7 +112,8 @@ struct Day08: Challenge {
         print(grid)
 
         var output = ""
-        output.append("Part 1: \(part1(grid))")
+        output.append("Part 1: \(part1(grid))\n")
+        output.append("Part 2: \(part2(grid))")
 
         return output
     }
@@ -109,7 +132,14 @@ struct Day08: Challenge {
         return "Visible from outside: \(visibleCount)"
     }
 
-    private func part2() -> String {
-        ""
+    private func part2(_ grid: Grid) -> String {
+        var maxScore = 0
+        for y in 0..<grid.height {
+            for x in 0..<grid.width {
+                maxScore = max(maxScore, grid.scenicScore(x, y))
+            }
+        }
+
+        return "Max Scenic Score is \(maxScore)"
     }
 }
