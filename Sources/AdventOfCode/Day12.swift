@@ -14,11 +14,13 @@ struct Day12: Challenge {
 
         return output
     }
-    func part1(terrain: Grid) -> String {
-        var pathFinder = PathFinder(terrain: terrain)
-        dump(pathFinder)
 
-        let path = pathFinder.shortestPath()
+    func part1(terrain: Grid) -> String {
+        let pathFinder = PathFinder(terrain: terrain)
+        let start = terrain.find("S")!
+        let end = terrain.find("E")!
+
+        let path = pathFinder.shortestPath(from: start, to: end)
         for segment in zip(path, path.dropFirst()) {
             let dx = segment.1.x - segment.0.x
             let dy = segment.1.y - segment.0.y
@@ -62,6 +64,21 @@ struct Day12: Challenge {
         var debugDescription: String {
             description
         }
+        func direction(to other: Node) -> Character {
+            let dx = other.x - x
+            let dy = other.y - y
+            if dx > 0 {
+                return ">"
+            } else if dx < 0 {
+                return "<"
+            } else if dy > 0 {
+                return "v"
+            } else if dy < 0 {
+                return "^"
+            } else {
+                return "x"
+            }
+        }
     }
     struct Pair<A: Hashable, B: Hashable>: Hashable {
         let a: A
@@ -78,65 +95,84 @@ struct Day12: Challenge {
     struct PathFinder {
         let terrain: Grid
 
-        var start: (Int, Int)
-        var destination: (Int, Int)
-        var current: (Int, Int)
 
         init(terrain: Grid) {
             self.terrain = terrain
-            self.start = terrain.find("S")!
-            self.destination = terrain.find("E")!
-            self.current = start
         }
 
-        func shortestPath() -> [Node] {
-            var paths: [Node: Int] = [:]
-            var pq = PriorityQueue<Path>()
-            var visited: Set<Node> = []
-            var prev: [Node: Node] = [:]
+        func shortestPath(from: (Int, Int), to: (Int, Int)) -> [Node] {
+            shortestPath(from: from, stop: { $0 == to })
+        }
 
-            var node = Node(start)
-            paths[node] = 0
-            while true {
+        func shortestPath(from: (Int, Int), stop: ((Int, Int)) -> Bool) -> [Node] {
+            var dist: [Node: Int] = [:]
+            let startNode = Node(from)
+            let destNode = Node(to)
+
+            // best distance to get to this node
+            var bestPaths: [Node: (Node, Int)] = [:]
+
+            var pq = PriorityQueue<Path>()
+
+            var visited: Set<Node> = []
+
+            // seed algorith with start node values
+            dist[startNode] = 0
+            pq.enqueue(element: .init(a: startNode, b: startNode, cost: 0))
+
+            while let nextMinPath = pq.dequeue() {
+                let node = nextMinPath.b
+                print("visiting node \(node), cost is \(nextMinPath.cost)")
+
+                if nextMinPath.cost > dist[node, default: .max] {
+                    // we've already found a better path, skip it
+                    print("we already have a better cost to this node \(dist[node]!)")
+                    continue
+                }
                 visited.insert(node)
-                let neighbors = terrain.neighbors(node.pos)
-                for n in neighbors {
-                    let b = Node(n.pos)
-                    if visited.contains(b) {
+                for n in terrain.neighbors(node.pos) {
+                    let neighborNode = Node(n.pos)
+                    guard !visited.contains(neighborNode) else { continue }
+                    print("\t neighbor (\(n.pos)) -> \(n.cost) ")
+
+                    if n.cost > 1 {
+                        print("\t unreachable...")
                         continue
                     }
-
-                    var cost = paths[node].flatMap { $0 + n.cost } ?? .max
-                    if cost > 1 {
-                        // untraversible
-                        cost = .max
+                    let costFromStart = n.cost + nextMinPath.cost + 1
+                    print("\t\t fromStart \(costFromStart)")
+                    if costFromStart < dist[neighborNode, default: .max] {
+                        print("\t\t this is better, saving in the pq")
+                        dist[neighborNode] = costFromStart
+                        pq.enqueue(element: .init(a: startNode, b: neighborNode, cost: costFromStart))
                     }
-                    if cost < paths[b, default: .max] {
-                        paths[b] = cost
-                        prev[b] = node
+                    if bestPaths[neighborNode]?.1 ?? .max > costFromStart {
+                        // insert/replace this one as the best path to this neighbor node, from node
+                        print("\t\t best path so far to this node is via \(node)")
+                        bestPaths[neighborNode] = (node, costFromStart)
                     }
-                    pq.enqueue(element: .init(a: node, b: b, cost: cost))
                 }
-
-                // choose the next cheapest neighbor to move to
-                guard let next = pq.dequeue()?.b else { break }
-                node = next
             }
 
-            print("Path table:", paths)
+            var pathMap = Grid(data: .init(repeating: ".", count: terrain.width * terrain.height), width: terrain.width, height: terrain.height)
+            pathMap.replace(char: "E", at: destination)
+
             var path: [Node] = []
-            var current = Node(destination)
-            while current != Node(start) {
+            var current = destNode
+            while current != startNode {
                 path.append(current)
-                current = prev[current]!
+                let (pathVia, _) = bestPaths[current]!
+                pathMap.replace(char: pathVia.direction(to: current), at: pathVia.pos)
+                current = pathVia
             }
-
+            print(pathMap)
+            print("Number of steps: \(path.count)")
             return path.reversed()
         }
     }
 
     struct Grid: CustomStringConvertible {
-        private let data: [Character]
+        private var data: [Character]
         let height: Int
         let width: Int 
 
@@ -153,16 +189,21 @@ struct Day12: Challenge {
             return indexToPos(index)
         }
 
+        mutating func replace(char: Character, at pos: (Int, Int)) {
+            guard let index = posToIndex(pos) else { return }
+            data[index] = char
+        }
+
         func neighbors(_ pos: (x: Int, y: Int)) -> [(pos: (x: Int, y: Int), cost: Int)] {
             let cur = self[pos]!
             let curCost = cost(cur)
 
             let up =    (x: pos.x,   y: pos.y-1)
+            let right = (x: pos.x+1, y: pos.y)
             let down =  (x: pos.x,   y: pos.y+1)
             let left =  (x: pos.x-1, y: pos.y)
-            let right = (x: pos.x+1, y: pos.y)
 
-            return [ up, down, left, right ].compactMap { pos in
+            return [ up, right, down, left ].compactMap { pos in
                 guard let char = self[pos] else { return nil }
                 let cost = self.cost(char) - curCost
                 return (pos, Int(cost))
@@ -192,7 +233,7 @@ struct Day12: Challenge {
             return data[index]
         }
 
-        private func posToIndex(_ pos: (x: Int, y: Int)) -> Int? {
+        func posToIndex(_ pos: (x: Int, y: Int)) -> Int? {
             let index = pos.y * width + pos.x
             if index < 0 || index >= data.count {
                 return nil
@@ -200,7 +241,7 @@ struct Day12: Challenge {
             return index
         }
 
-        private func indexToPos(_ index: Int) -> (Int, Int) {
+        func indexToPos(_ index: Int) -> (Int, Int) {
             let y = index / width
             let x = (index % width)
             return (x, y)

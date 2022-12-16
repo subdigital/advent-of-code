@@ -1,29 +1,43 @@
 import Collections
 
 public struct PriorityQueue<T: Comparable> {
-  private var heap: Heap<T>
+    private var heap: Heap<T>
 
-  public init() {
-      heap = Heap()
-  }
+    public enum Mode {
+        case min
+        case max
+    }
 
-  public var isEmpty: Bool {
-    heap.isEmpty
-  }
+    private let mode: Mode
 
-  public var count: Int {
-    heap.count
-  }
+    public init(mode: Mode = .min) {
+        heap = Heap()
+        self.mode = mode
+    }
 
-  public func peek() -> T? {
-      heap.min()
-  }
+    public var isEmpty: Bool {
+        heap.isEmpty
+    }
 
-  public mutating func enqueue(element: T) {
-    heap.insert(element)
-  }
+    public var count: Int {
+        heap.count
+    }
 
-  public mutating func dequeue() -> T? {
-    heap.popMin()
-  }
+    public func peek() -> T? {
+        switch mode {
+        case .min: return heap.min()
+        case .max: return heap.max()
+        }
+    }
+
+    public mutating func enqueue(element: T) {
+        heap.insert(element)
+    }
+
+    public mutating func dequeue() -> T? {
+        switch mode {
+        case .min: return heap.popMin()
+        case .max: return heap.popMax()
+        }
+    }
 }
