@@ -1,5 +1,6 @@
 use day04::process_part1;
 
 fn main() {
-    println!("Hello, world!");
+    let input = include_str!("../input.txt");
+    println!("{}", process_part1(input));
 }
