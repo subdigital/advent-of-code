@@ -54,11 +54,11 @@ fn parse_card(input: &str) -> IResult<&str, Card> {
 
     Ok((
         input,
-        dbg!(Card {
+        Card {
             id,
             nums: HashSet::from_iter(nums.iter().cloned()),
             winners: HashSet::from_iter(winners.iter().cloned())
-        }),
+        },
     ))
 }
 

@@ -23,11 +23,9 @@ pub fn process(input: &str) -> String {
     let total: u32 = cards.iter().fold(inventory, |mut inv, card| {
         let count = &inv.get(&card.id).unwrap().clone();
         let score: u32 = card.winning_numbers().len().try_into().unwrap();
-        println!("Card {} has score {}", card.id, score);
         for i in 1..=score {
             inv.entry(card.id + i).and_modify(|v| *v += *count);
         }
-        dbg!(&inv);
         inv
     })
     .values()
