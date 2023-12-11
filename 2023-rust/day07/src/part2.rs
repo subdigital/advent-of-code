@@ -36,9 +36,14 @@ pub fn process(input: &str) -> String {
         .iter()
         .sorted()
         .enumerate()
-        .map(|(index, hand_bid)| {
-            println!("Rank {} - {} ({:?})", index+1, hand_bid.hand, hand_bid.hand.best_hand_type());
-            (index, hand_bid)
+        .inspect(|(index, hand_bid)| {
+            println!("Rank {} - {} ({:?}) (bid: {}, value: {})",
+             index+1,
+             hand_bid.hand,
+             hand_bid.hand.best_hand_type(),
+             hand_bid.bid,
+             hand_bid.bid * (index + 1) as u32
+            );
         })
         .map(|(index, hand_bid)|  ((index as u32) + 1) * hand_bid.bid)
         .sum();
@@ -197,6 +202,8 @@ fn parse_hand(input: &str) -> Hand {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp::Ordering;
+
     use indoc::indoc;
     use super::*;
 
@@ -281,5 +288,22 @@ mod tests {
         let cards = "35533".chars().filter_map(parse_card).collect::<Vec<_>>();
         let expected_remaining: Vec<Card> = vec![];
         assert_eq!(detect_full_house()(cards), (expected_remaining, true));
+    }
+
+    #[test]
+    fn test_all_jokers() {
+        let cards = "JJJJJ".chars().filter_map(parse_card).collect::<Vec<_>>();
+        let hand = Hand { cards };
+        assert_eq!(hand.best_hand_type(), HandType::FiveKind);
+    }
+
+    #[test]
+    fn test_all_jokers_loses_to_all_aces() {
+        let cards_j = "JJJJJ".chars().filter_map(parse_card).collect::<Vec<_>>();
+        let cards_a = "AAAAA".chars().filter_map(parse_card).collect::<Vec<_>>();
+        let hand_j = HandBid { hand: Hand { cards: cards_j }, bid: 100 };
+        let hand_a = HandBid { hand: Hand { cards: cards_a }, bid: 100 };
+
+        assert!(hand_a > hand_j);
     }
 }
