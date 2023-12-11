@@ -2,7 +2,7 @@ use core::fmt;
 use std::{collections::HashMap, cmp, fmt::{Formatter, Write}};
 use itertools::Itertools;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct HandBid {
     hand: Hand,
     bid: u32
@@ -36,16 +36,17 @@ pub fn process(input: &str) -> String {
         .iter()
         .sorted()
         .enumerate()
-        .inspect(|(index, hand_bid)| {
+        .map(|(index, hand_bid)|  (((index as u32) + 1), hand_bid))
+        .inspect(|(rank, hand_bid)| {
             println!("Rank {} - {} ({:?}) (bid: {}, value: {})",
-             index+1,
+            rank,
              hand_bid.hand,
              hand_bid.hand.best_hand_type(),
              hand_bid.bid,
-             hand_bid.bid * (index + 1) as u32
+             hand_bid.bid * rank
             );
         })
-        .map(|(index, hand_bid)|  ((index as u32) + 1) * hand_bid.bid)
+        .map(|(rank, hand_bid)| rank * hand_bid.bid)
         .sum();
     format!("{sum}")
 }
@@ -65,7 +66,7 @@ fn parse_hands_and_bids(input: &str) -> Vec<HandBid> {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct Hand {
     cards: Vec<Card>
 }
@@ -102,7 +103,11 @@ fn detect_kind(count: u32) -> Box<dyn Fn(Vec<Card>) -> (Vec<Card>, bool)> {
         // println!("Detecting kind({}) from cards: {:?} ({} wilds)", count, cards.iter().map(|c| c.val).join(""), wild_count);
         for card in cards.clone().into_iter() {
             counts.entry(card.val).and_modify(|c| *c += 1).or_insert(1);
-            if counts.get(&card.val).unwrap() + wild_count >= count {
+            let mut card_count = counts.get(&card.val).unwrap().clone();
+            if !card.is_wild() {
+                card_count += wild_count;
+            }
+            if card_count >= count {
                 let remaining = &cards
                     .into_iter()
                     .filter(|c| &c.val != &card.val && &c.val != &'J')
@@ -305,5 +310,17 @@ mod tests {
         let hand_a = HandBid { hand: Hand { cards: cards_a }, bid: 100 };
 
         assert!(hand_a > hand_j);
+    }
+
+    #[test]
+    fn test_three_kind_j874j() {
+        let cards = "J874J".chars().filter_map(parse_card).collect::<Vec<_>>();
+        let expected_remaining: Vec<Card> = vec![
+            Card { val: '7', rank: 7 },
+            Card { val: '4', rank: 4 }
+        ];
+
+        assert_eq!(detect_kind(4)(cards.clone()), (cards.clone(), false));
+        assert_eq!(detect_kind(3)(cards), (expected_remaining, true));
     }
 }
