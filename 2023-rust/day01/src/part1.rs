@@ -1,5 +1,5 @@
 pub fn process(input: &str) -> String {
-    let  calibration_values = input
+    let calibration_values = input
         .lines()
         .map(|l| {
             let nums = l.chars()
