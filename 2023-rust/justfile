@@ -1,10 +1,16 @@
 work day part:
 	cargo watch -c -w {{day}} -x "check -p {{day}}" -s "just test {{day}} {{part}}" -s "just lint {{day}}"
 
+run day part:
+	cargo run -p {{day}} --bin {{part}}
+
 lint day:
 	cargo clippy -p {{day}}
 
 test day part:
+	cargo nextest run -p {{day}} {{part}}
+
+testv day part:
 	cargo nextest run -p {{day}} {{part}} --nocapture
 
 create day:
