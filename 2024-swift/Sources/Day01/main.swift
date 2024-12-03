@@ -1,4 +1,5 @@
 import Foundation
+import AOCHelper
 
 enum Day01 {
     static func part1(_ input: String) -> String {
@@ -53,8 +54,7 @@ enum Day01 {
     }
 }
 
-let url = Bundle.module.url(forResource: "input", withExtension: "txt")!
-let input = String(data: try Data(contentsOf: url), encoding: .utf8)!
+let input = try readInput(from: .module)
 print("DAY 01 Part 1: ")
 print(Day01.part1(input))
 print("---------------------")
