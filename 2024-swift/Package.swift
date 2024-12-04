@@ -3,37 +3,51 @@
 
 import PackageDescription
 
-let package = Package(
-    name: "AdventOfCode2024",
-    platforms: [.macOS(.v10_15)],
-    products: [
-        .executable(name: "Day01", targets: ["Day01"]),
-        .executable(name: "Day02", targets: ["Day02"]),
-        .library(name: "AOCHelper", targets: ["AOCHelper"])
-    ],
-    dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-parsing", from: "0.13.0")
-    ],
-    targets: [
-        .target(name: "AOCHelper"),
+let days = [
+    1, 2, 3, 4
+]
 
-        .executableTarget(
-            name: "Day01",
-            dependencies: [
-                "AOCHelper",
-            ],
-            resources: [.process("input.txt")]
-        ),
-        .testTarget(name: "Day01Tests", dependencies: ["Day01"], path: "Tests/Day01"),
+func dayName(_ day: Int) -> String {
+    "Day\(String(format: "%02d", day))"
+}
 
+func executable(day: Int) -> Product {
+    let name = dayName(day)
+    return .executable(name: name, targets: [name])
+}
+
+func target(day: Int) -> [Target] {
+    let name = dayName(day)
+    return [
         .executableTarget(
-            name: "Day02",
+            name: name,
             dependencies: [
                 .product(name: "Parsing", package: "swift-parsing"),
                 .target(name: "AOCHelper")
             ],
             resources: [.process("input.txt")]
         ),
-        .testTarget(name: "Day02Tests", dependencies: ["Day02"], path: "Tests/Day02"),
+        .testTarget(
+            name: "\(name)Tests",
+            dependencies: [ .target(name: name) ],
+            path: "Tests/\(name)"
+        ),
+    ]
+}
+
+let dayProducts = days.map(executable)
+let dayTargets = days.flatMap(target)
+
+let package = Package(
+    name: "AdventOfCode2024",
+    platforms: [.macOS(.v14), .iOS(.v16)],
+    products: dayProducts + [
+        .library(name: "AOCHelper", targets: ["AOCHelper"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-parsing", from: "0.13.0")
+    ],
+    targets: dayTargets + [
+        .target(name: "AOCHelper")
     ]
 )
