@@ -1,16 +1,2 @@
 prepare day:
-	#!/usr/bin/env ruby
-	require 'fileutils'
-	puts "Preparing Day {{day}}"
-	folder = "Day#{format('%02d', {{day}})}" 
-	puts folder
-	FileUtils.mkdir_p "Sources/#{folder}"
-	FileUtils.mkdir_p "Tests/#{folder}"
-	File.open("Sources/#{folder}/main.swift", "w") do |f|
-		f.puts <<-eos
-	import AOCHelper
-	import Foundation
-	import Parsing
-		eos
-	end
-
+	@Scripts/scaffold.rb {{day}}
