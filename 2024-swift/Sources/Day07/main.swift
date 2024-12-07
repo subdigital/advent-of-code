@@ -36,15 +36,27 @@ enum Day07 {
         return String(sum)
     }
 
-    static func part2(_ input: String) throws -> String {
+    static func part2(_ input: String) async throws -> String {
         let lines = try parseInput(input)
-        let matchingLines = lines.filter { line in
-            testLineAddMulConcat(result: line.0, operands: line.1)
+
+        return await withTaskGroup(of: Int.self) { group in
+            for line in lines {
+                group.addTask {
+                    if testLineAddMulConcat(result: line.0, operands: line.1) {
+                        return line.0
+                    } else {
+                        return 0
+                    }
+                }
+            }
+
+            var sum = 0
+            for await result in group {
+                sum += result
+            }
+
+            return String(sum)
         }
-
-        let sum = matchingLines.map(\.0).reduce(0, +)
-
-        return String(sum)
     }
 
     static func testLineAddMul(result: Int, operands: [Int]) -> Bool {
@@ -132,6 +144,5 @@ print(try Day07.part1(input))
 print("---------------------")
 
 print("DAY 07 Part 2: ")
-print(try Day07.part2(input))
+print(try await Day07.part2(input))
 print("---------------------")
-
