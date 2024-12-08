@@ -1,7 +1,7 @@
 import AOCHelper
 import Foundation
 
-private extension Grid where T == Character {
+private extension Grid where Element == Character {
     // X M
     func searchNeighbors(
         from: Point,

@@ -5,8 +5,8 @@
 //  Created by Ben Scheirman on 12/6/24.
 //
 
-public struct Grid<T> {
-    public var data: [[T]]
+public struct Grid<Element> {
+    public var data: [[Element]]
 
     public var rows: Int { data.count }
     public var cols: Int {
@@ -15,17 +15,17 @@ public struct Grid<T> {
         return data[0].count
     }
 
-    public subscript(x: Int, y: Int) -> T {
+    public subscript(x: Int, y: Int) -> Element {
         get { data[y][x] }
         set { data[y][x] = newValue }
     }
 
-    public subscript(_ point: Point) -> T {
+    public subscript(_ point: Point) -> Element {
         get { data[point.y][point.x] }
         set { data[point.y][point.x] = newValue }
     }
 
-    public init(data: [[T]]) {
+    public init(data: [[Element]]) {
         self.data = data
     }
 
@@ -35,7 +35,7 @@ public struct Grid<T> {
     }
 }
 
-extension Grid: CustomStringConvertible where T: CustomStringConvertible {
+extension Grid: CustomStringConvertible where Element: CustomStringConvertible {
     public var description: String {
         data.map { row in
             row.map { $0.description }
@@ -45,7 +45,9 @@ extension Grid: CustomStringConvertible where T: CustomStringConvertible {
     }
 }
 
-public struct Point: Hashable {
+extension Grid: Sendable where Element: Sendable { }
+
+public struct Point: Hashable, Sendable {
     public let x: Int
     public let y: Int
 
@@ -71,6 +73,26 @@ extension Point: CustomStringConvertible {
 
     public static func + (lhs: Point, rhs: Point) -> Point {
         Point(lhs.x + rhs.x, lhs.y + rhs.y)
+    }
+
+    public static func * (lhs: Point, rhs: Point) -> Point {
+        Point(lhs.x * rhs.x, lhs.y * rhs.y)
+    }
+
+    public static func * (lhs: Point, rhs: Int) -> Point {
+        Point(lhs.x * rhs, lhs.y * rhs)
+    }
+
+    public static func - (lhs: Point, rhs: Point) -> Point {
+        Point(lhs.x - rhs.x, lhs.y - rhs.y)
+    }
+
+    public static func += (lhs: inout Point, rhs: Point) {
+        lhs = lhs + rhs
+    }
+
+    public static func -= (lhs: inout Point, rhs: Point) {
+        lhs = lhs - rhs
     }
 
     public var description: String {
@@ -116,3 +138,4 @@ public enum Direction {
         self == .left || self == .right
     }
 }
+
