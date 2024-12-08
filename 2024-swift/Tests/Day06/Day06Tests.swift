@@ -22,7 +22,7 @@ struct Day06Test {
     }
 
     @Test
-    func part2() throws {
+    func part2() async throws {
         let input = """
         ....#.....
         .........#
@@ -36,7 +36,7 @@ struct Day06Test {
         ......#...
         """
 
-        let result = Day06.part2(input)
+        let result = await Day06.part2(input)
         #expect(result == "6")
     }
 }
