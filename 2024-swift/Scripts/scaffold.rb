@@ -11,19 +11,23 @@ puts folder
 FileUtils.mkdir_p "Sources/#{folder}"
 FileUtils.mkdir_p "Tests/#{folder}"
 
-File.write("Sources/#{folder}/input.txt", "")
+def write_file_safe(file_name, contents)
+  return if File.exist?(file_name) and puts "File #{file_name} already exists, skipping."
 
-File.open("Sources/#{folder}/main.swift", "w") do |f|
-  f.puts <<-EOS
+  File.write(file_name, contents)
+end
+
+write_file_safe("Sources/#{folder}/input.txt", "")
+
+write_file_safe("Sources/#{folder}/main.swift", <<-EOS
 import AOCHelper
 import Foundation
 import Parsing
-  EOS
-end
+EOS
+                )
 
-File.open("Tests/#{folder}/#{folder}Tests.swift", "w") do |f|
-  f.puts <<-EOS
+write_file_safe("Tests/#{folder}/#{folder}Tests.swift", <<-EOS
 import Testing
 @testable import #{folder}
-  EOS
-end
+EOS
+                )
