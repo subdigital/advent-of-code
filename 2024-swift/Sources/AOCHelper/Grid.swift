@@ -35,6 +35,34 @@ public struct Grid<Element> {
     }
 }
 
+public extension Grid {
+    func neighbors(for point: Point) -> [Point] {
+        [
+            Point.up,
+            .down,
+            .left,
+            .right
+        ]
+            .map { point + $0 }
+            .filter(isInside)
+    }
+}
+
+extension Grid where Element: Equatable {
+    public func searchAll(for el: Element) -> [Point] {
+        var results: [Point] = []
+        for y in 0..<rows {
+            for x in 0..<cols {
+                if data[y][x] == el {
+                    results.append(Point(x, y))
+                }
+            }
+        }
+
+        return results
+    }
+}
+
 extension Grid: CustomStringConvertible where Element: CustomStringConvertible {
     public var description: String {
         data.map { row in
