@@ -12,38 +12,6 @@ extension Point {
     }
 }
 
-extension Grid: Sequence {
-    public struct Iterator: IteratorProtocol {
-        let grid: Grid
-        var currentRow: Int
-        var currentColumn: Int
-
-        init(grid: Grid) {
-            self.grid = grid
-            self.currentRow = 0
-            self.currentColumn = 0
-        }
-
-        public mutating func next() -> (Point, Element)? {
-            guard currentRow < grid.data.count else { return nil }
-
-            let point = Point(currentColumn, currentRow)
-            let el = grid[point]
-
-            currentColumn += 1
-            if currentColumn >= grid.data[currentRow].count {
-                currentColumn = 0
-                currentRow += 1
-            }
-
-            return (point, el)
-        }
-    }
-
-    public func makeIterator() -> Iterator {
-        Iterator(grid: self)
-    }
-}
 
 extension Grid where Element: Equatable {
     func findOne(for target: Element) -> Point {
