@@ -1,0 +1,2 @@
+prepare day:
+	@Scripts/scaffold.rb {{day}}
