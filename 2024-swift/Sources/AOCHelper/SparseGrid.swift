@@ -54,3 +54,35 @@ extension SparseGrid where Element: Equatable {
 }
 
 extension SparseGrid: Sendable where Element: Sendable { }
+
+extension SparseGrid: Sequence {
+    public struct Iterator: IteratorProtocol {
+        let grid: SparseGrid
+        var currentIndex: Int
+        var keys: [Point]
+
+        init(grid: SparseGrid) {
+            self.grid = grid
+            self.keys = Array(grid.data.keys)
+            self.currentIndex = 0
+        }
+
+        public mutating func next() -> (Point, Element)? {
+            guard currentIndex < keys.count else {
+                return nil
+            }
+
+            defer {
+                currentIndex += 1
+            }
+
+            let key = keys[currentIndex]
+            return (key, grid.data[key]!)
+        }
+    }
+
+    public func makeIterator() -> Iterator {
+        Iterator(grid: self)
+    }
+
+}

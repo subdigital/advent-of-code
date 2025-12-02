@@ -109,9 +109,11 @@ extension Grid: CustomStringConvertible where Element: CustomStringConvertible {
 
 extension Grid: Sendable where Element: Sendable { }
 
+public typealias Vec2 = Point
+
 public struct Point: Hashable, Sendable {
-    public let x: Int
-    public let y: Int
+    public var x: Int
+    public var y: Int
 
     public init(_ x: Int, _ y: Int) {
         self.x = x

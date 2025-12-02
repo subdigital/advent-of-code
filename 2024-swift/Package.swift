@@ -1,14 +1,15 @@
 // swift-tools-version: 6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+import Foundation
 
 let days = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 ]
 
 func dayName(_ day: Int) -> String {
-    "Day\(String(format: "%02d", day))"
+    let d = day < 10 ? "0\(day)" : "\(day)"
+    return "Day\(d)"
 }
 
 func executable(day: Int) -> Product {
@@ -18,6 +19,7 @@ func executable(day: Int) -> Product {
 
 func target(day: Int) -> [Target] {
     let name = dayName(day)
+    let hasShaders = FileManager.default.fileExists(atPath: "Sources/\(name)/Shaders.metal")
     return [
         .executableTarget(
             name: name,
@@ -25,7 +27,9 @@ func target(day: Int) -> [Target] {
                 .product(name: "Parsing", package: "swift-parsing"),
                 .target(name: "AOCHelper")
             ],
-            resources: [.process("input.txt")]
+            resources: [
+                .process("input.txt")
+            ] + (hasShaders ? [.process("Shaders.metal")] : [])
         ),
         .testTarget(
             name: "\(name)Tests",
