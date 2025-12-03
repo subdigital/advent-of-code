@@ -1,0 +1,8 @@
+[tasks.build]
+run = "swift build"
+
+[tasks.test]
+run = "clear && swift test"
+
+[tasks.run]
+run = "clear && swift run"

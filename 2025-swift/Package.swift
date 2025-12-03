@@ -4,7 +4,7 @@ import PackageDescription
 import Foundation
 
 let days = [
-    1
+    1, 2
 ]
 
 func dayName(_ day: Int) -> String {
