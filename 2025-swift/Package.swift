@@ -3,13 +3,15 @@
 import PackageDescription
 import Foundation
 
-let days = [
-    1, 2
-]
+let days = try FileManager.default.contentsOfDirectory(atPath: ".")
+         .filter { $0.starts(with: "Day") }
+         .map { $0.replacingOccurrences(of: "Day", with: "") }
+         .map(Int.init)
+         .compactMap { $0 }
+         .sorted()
 
 func dayName(_ day: Int) -> String {
-    let d = day < 10 ? "0\(day)" : "\(day)"
-    return "Day\(d)"
+    String(format: "Day%02d", day)
 }
 
 func executable(day: Int) -> Product {
@@ -26,17 +28,28 @@ func target(day: Int) -> [Target] {
                 .product(name: "Parsing", package: "swift-parsing"),
                 .target(name: "AOCHelper")
             ],
+            path: name,
+            exclude: ["tests"], // ugh
+            sources: ["src"],
             resources: [
                 .process("input.txt")
-            ]
+            ],
         ),
         .testTarget(
             name: "\(name)Tests",
             dependencies: [ .target(name: name) ],
-            path: "Tests/\(name)"
+            path: name,
+            exclude: ["src", "input.txt"], // ugh
+            sources: ["tests"]
         ),
     ]
 }
+
+let helper = Target.target(
+    name: "AOCHelper",
+    path: "lib/AOCHelper",
+    sources: ["src"]
+)
 
 let dayProducts = days.map(executable)
 let dayTargets = days.flatMap(target)
@@ -50,7 +63,5 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-parsing", from: "0.14.1")
     ],
-    targets: dayTargets + [
-        .target(name: "AOCHelper")
-    ]
+    targets: dayTargets + [helper]
 )
