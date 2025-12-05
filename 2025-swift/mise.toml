@@ -11,7 +11,21 @@ run = "swift build"
 run = "clear && swift test"
 
 [tasks.run]
-run = "clear && swift run"
+usage = "arg <day>"
+run = '''
+bin=$(printf 'Day%02d' ${usage_day?})
+clear
+swift run $bin
+'''
+
+[tasks.benchmark]
+usage = "arg <day>"
+run = '''
+bin=$(printf 'Day%02d' ${usage_day?})
+clear
+swift build -c release
+swift run $bin
+'''
 
 [tasks.prepare]
 usage = "arg <day>"
