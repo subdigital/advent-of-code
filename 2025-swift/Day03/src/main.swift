@@ -2,25 +2,15 @@ import AOCHelper
 
 let input = readInput(from: .module)
 
-func runPart1() {
-    let sampleInput = ""
-    print("----- Sample -----")
-    print(Part1.process(sampleInput))
-    print()
-
+func runPart1() throws {
     print("----- DAY 03 PART 1 -----")
-    print(Part1.process(input))
+    print(try Part1.process(input))
 }
 
-func runPart2() {
-    let sampleInput = ""
-    print("----- Sample -----")
-    print(Part2.process(sampleInput))
-    print()
-
+func runPart2() throws {
     print("----- DAY 03 PART 2 -----")
-    print(Part2.process(input))
+    print(try Part2.process(input))
 }
 
-// runPart1()
-// runPart2()
+try runPart1()
+try runPart2()
