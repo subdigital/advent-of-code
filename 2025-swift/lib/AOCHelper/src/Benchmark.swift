@@ -1,11 +1,15 @@
 import Foundation
 
-public func withBenchmark(_ run: () throws -> Void) rethrows {
+public func withBenchmark<T>(_ label: String? = nil, _ run: () throws -> T) rethrows -> T {
     let clock = ContinuousClock()
+    var returnValue: T!
     let elapsed = try clock.measure {
-        try run()
+        returnValue = try run()
     }
-    print("time: \(formatInterval(elapsed))")
+    let prefix: String = if let label { "[\(label)] " } else { "" }
+
+    print("\(prefix)time: \(formatInterval(elapsed))")
+    return returnValue
 }
 
 private func formatInterval(_ duration: Duration) -> String {

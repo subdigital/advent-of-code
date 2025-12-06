@@ -3,12 +3,14 @@
 import PackageDescription
 import Foundation
 
+// this dynamic method doesn't work with Xcode, so if you need to run with a debugger, replace with a static array...
+// let days = [5]
 let days = try FileManager.default.contentsOfDirectory(atPath: ".")
-         .filter { $0.starts(with: "Day") }
-         .map { $0.replacingOccurrences(of: "Day", with: "") }
-         .map(Int.init)
-         .compactMap { $0 }
-         .sorted()
+        .filter { $0.starts(with: "Day") }
+        .map { $0.replacingOccurrences(of: "Day", with: "") }
+        .map(Int.init)
+        .compactMap { $0 }
+        .sorted()
 
 func dayName(_ day: Int) -> String {
     String(format: "Day%02d", day)
