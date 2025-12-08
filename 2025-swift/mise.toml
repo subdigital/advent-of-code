@@ -24,7 +24,7 @@ run = '''
 bin=$(printf 'Day%02d' ${usage_day?})
 clear
 swift build -c release
-swift run $bin
+.build/release/$bin
 '''
 
 [tasks.prepare]

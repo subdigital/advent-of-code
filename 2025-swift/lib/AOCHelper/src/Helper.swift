@@ -1,8 +1,12 @@
 import Foundation
 
-public func readInput(from bundle: Bundle) -> String {
+public func readInput(from bundle: Bundle, trimWhitespaceAndNewLines: Bool = true) -> String {
     let path = bundle.path(forResource: "input", ofType: "txt")!
-    return try! String(contentsOfFile: path, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
+    var result = try! String(contentsOfFile: path, encoding: .utf8)
+    if trimWhitespaceAndNewLines {
+        result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    return result
 }
 
 public extension String {
