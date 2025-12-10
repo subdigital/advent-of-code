@@ -3,14 +3,25 @@
 import PackageDescription
 import Foundation
 
-// this dynamic method doesn't work with Xcode, so if you need to run with a debugger, replace with a static array...
-let days = [6]
-// let days = try FileManager.default.contentsOfDirectory(atPath: ".")
-//         .filter { $0.starts(with: "Day") }
-//         .map { $0.replacingOccurrences(of: "Day", with: "") }
-//         .map(Int.init)
-//         .compactMap { $0 }
-//         .sorted()
+func getDays() throws -> [Int] {
+    if ProcessInfo.processInfo.environment["AUTODETECT_PACKAGES"] == "1" {
+        print("Autodetecting packages")
+        let days = try FileManager.default.contentsOfDirectory(atPath: ".")
+                .filter { $0.starts(with: "Day") }
+                .map { $0.replacingOccurrences(of: "Day", with: "") }
+                .map(Int.init)
+                .compactMap { $0 }
+                .sorted()
+        return days
+    } else {
+        // this dynamic method doesn't work with Xcode, so if you need to run with a debugger, replace with a static array...
+        let days = [1, 2, 3, 4, 5, 6, 7]
+        return days
+    }
+}
+
+let days = try getDays()
+
 
 func dayName(_ day: Int) -> String {
     String(format: "Day%02d", day)
